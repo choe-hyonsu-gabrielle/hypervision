@@ -1,6 +1,5 @@
 # hypervision
 
-***
 ### Requirements
 ```shell
 pip install transformers datasets lightnings scikit-learn tensorboard tensorboardX
