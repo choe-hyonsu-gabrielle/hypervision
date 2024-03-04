@@ -3,7 +3,7 @@ import glob
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
-from supervision.data.datamodule import HateSpeechBaselineCSVsDataModule
+from supervision.data.datamodule import BaselineCSVsDataModule
 from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
 
 
