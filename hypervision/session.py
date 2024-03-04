@@ -40,7 +40,7 @@ class HypervisionSession:
         self.trainer_params: dict = {
             'max_epochs': 20,
             'devices': [0, 1, 2, 3],  # gpu device ids for pl.Trainer
-            'strategy': 'auto'  # 'ddp_find_unused_parameters_true' when you're using KcBERT
+            'strategy': 'ddp_find_unused_parameters_true'  # or 'auto'
         }
 
         # constants
