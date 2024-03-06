@@ -17,7 +17,7 @@ class BertClassifierConfig(ModelConfigBase):
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.objective = torch.nn.CrossEntropyLoss()
-        self.activation = torch.nn.Softmax()
+        self.activation = torch.nn.Softmax(dim=-1)
 
         # optimizer and scheduler
         self.optimizer = torch.optim.AdamW
@@ -57,9 +57,7 @@ class BertClassifierModel(LightningModuleBase):
 
     def forward(self, inputs, apply_activation=False, *args: Any, **kwargs: Any) -> Any:
         encoder_outputs = self.pretrained_model(
-            input_ids=inputs['input_ids'],
-            token_type_ids=inputs['token_type_ids'],
-            attention_mask=inputs['attention_mask'],
+            **inputs,
             return_dict=True,
             output_hidden_states=True
         )
