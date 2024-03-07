@@ -109,9 +109,9 @@ class HypervisionSession:
         else:
             raise AttributeError('it returns best one correspond to whether callback_params["mode"] is `min` or `max`.')
 
-    def report(self, record: dict):
+    def reception(self, session_description: dict):
         # it is used by a supervision session to report score and checkpoint path when it is finished
-        self._reports.append(record)
+        self._reports.append(session_description)
 
 
 class SupervisionSession:
@@ -231,7 +231,7 @@ class SupervisionSession:
         if save_description:
             with open(f'{self.hypervisor.logging_dir}/{self.session_name}/session_desc.json', 'w', encoding='utf-8') as fp:
                 json.dump(self.description(as_dict=True), fp, ensure_ascii=False, indent=4)
-        self.hypervisor.report(desc)
+        self.hypervisor.reception(desc)
         self.hypervisor.event_logger.info(
             f'[{self.hypervisor.__class__.__name__}] terminate `{self.session_name}` (trial {self.trial_no}): {str(self)}\n'
             f'[{self.hypervisor.__class__.__name__}] best_model_path: {desc["best_model_path"]}\n'
