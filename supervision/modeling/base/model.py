@@ -18,7 +18,6 @@ class LightningModuleBase(pl.LightningModule):
         # core components
         self.pretrained_tokenizer: PreTrainedTokenizer = self.config.pretrained_tokenizer
         self.pretrained_model: PreTrainedModel = self.config.pretrained_model.to(self.device)
-        self.downstream_task_head = None
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
         optimizer = self.config.optimizer(self.parameters(), lr=self.config.learning_rate)
