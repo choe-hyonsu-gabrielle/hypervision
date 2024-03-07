@@ -63,16 +63,16 @@ class HypervisionSession:
         self._sanity_checks()
 
     def _sanity_checks(self):
+        # any sanity checking functions you want
         pass
 
     def _personalize(self, model_name, dataset_param, batch_size, learning_rate):
         supervision_session_name = '.'.join([
             self.session_name,                          # using hypervisor session name as a prefix
             model_name,                                 # any '/' in model name will be replaced with '-'
-            dataset_param['name'],                     # dataset_name
+            dataset_param['name'],                      # dataset_name
             f'lr={learning_rate}.bs={batch_size}'       # learning_rate & batch_size as identifier
         ]).replace('/', '-')
-
         return SupervisionSession(
             hypervisor=self,
             session_name=supervision_session_name,
@@ -103,11 +103,11 @@ class HypervisionSession:
         if not valid_scored_sessions:
             return None
         if self.callback_params['mode'] == 'min':
-            return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'], reverse=True)[0]
+            return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'])[0]
         elif self.callback_params['mode'] == 'max':
-            return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'], reverse=False)[0]
+            return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'])[0]
         else:
-            raise AttributeError('it returns best one correspond to callback_params["mode"] which is `min` or `max`.')
+            raise AttributeError('it returns best one correspond to whether callback_params["mode"] is `min` or `max`.')
 
     def report(self, record: dict):
         # it is used by a supervision session to report score and checkpoint path when it is finished
