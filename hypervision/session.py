@@ -105,7 +105,7 @@ class HypervisionSession:
         if self.callback_params['mode'] == 'min':
             return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'])[0]
         elif self.callback_params['mode'] == 'max':
-            return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'])[0]
+            return sorted(valid_scored_sessions, key=lambda x: x['best_model_score'])[-1]
         else:
             raise AttributeError('it returns best one correspond to whether callback_params["mode"] is `min` or `max`.')
 
