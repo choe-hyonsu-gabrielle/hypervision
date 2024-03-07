@@ -74,10 +74,9 @@ class BaselineCSVsDataModule(DataModuleBase):
                 )
             elif self.validation_dir:
                 print(f'[{self.__class__.__name__}] loading validation dataset regardless of {self.train_validation_ratio}')
-                validation_dataset = MultipleCSVsDataset(filenames=self.train_dir)
+                validation_dataset = MultipleCSVsDataset(filenames=self.validation_dir)
             else:
-                validation_dataset = None
-                ValueError(f"[{self.__class__.__name__}] `validation_dir` or `train_validation_ratio` must be provided.")
+                raise ValueError(f"[{self.__class__.__name__}] `validation_dir` or `train_validation_ratio` must be provided.")
             self.train = DataLoader(
                 dataset=train_dataset,
                 batch_size=self.batch_size,
@@ -92,14 +91,6 @@ class BaselineCSVsDataModule(DataModuleBase):
                 num_workers=self.num_workers,
                 collate_fn=self.collator
             )
-            if self.test_dir:
-                self.test = DataLoader(
-                    dataset=MultipleCSVsDataset(filenames=self.test_dir),
-                    batch_size=self.batch_size,
-                    shuffle=False,
-                    num_workers=self.num_workers,
-                    collate_fn=self.collator
-                )
         elif stage == 'validate':
             assert self.validation_dir
             validation_dataset = MultipleCSVsDataset(filenames=self.validation_dir)
