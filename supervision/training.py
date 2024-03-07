@@ -14,7 +14,7 @@ if __name__ == '__main__':
         pretrained_model_name_or_path='klue/bert-base',
         num_classes=2,
         batch_size=64,
-        learning_rates=1e-5
+        learning_rate=1e-5
     )
 
     # This is an independent LightningModule model.
