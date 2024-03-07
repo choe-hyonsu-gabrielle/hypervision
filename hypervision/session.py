@@ -146,6 +146,26 @@ class SupervisionSession:
         self.ended_at = None
         self.elapsed_time = None
 
+    @property
+    def model_params(self):
+        return dict(
+            pretrained_model_name_or_path=self.pretrained_model_name_or_path,
+            num_classes=self.num_classes,
+            batch_size=self.batch_size,
+            learning_rate=self.learning_rate
+        )
+
+    @property
+    def datamodule_params(self):
+        return dict(
+            train_dir=self.train_dir,
+            validation_dir=self.validation_dir,
+            test_dir=self.test_dir,
+            batch_size=self.batch_size,
+            train_validation_ratio=self.train_validation_ratio,
+            random_seed=self.hypervisor.random_seed,
+        )
+
     def __repr__(self):
         contents = {k: v for k, v in self.__dict__.items() if k in ('session_name', 'version', 'trial_no',)}
         return f'[{self.__class__.__name__}] {contents}'
