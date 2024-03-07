@@ -197,6 +197,8 @@ class SupervisionSession:
                 check_finite=True
             )
         ]
+        self.trainer_params['callbacks'] = self.callbacks
+        self.trainer_params['logger'] = self.tensorboard_logger
         self.trial_no = f'{self.hypervisor.supervision_sessions.index(self) + 1}/{len(self.hypervisor.supervision_sessions)}'
         self.hypervisor.event_logger.info(
             f'[{self.hypervisor.__class__.__name__}] initialize `{self.session_name}` (trial {self.trial_no}): {str(self)}'
