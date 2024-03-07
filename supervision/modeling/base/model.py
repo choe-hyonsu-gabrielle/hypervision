@@ -8,7 +8,7 @@ from supervision.modeling.base.config import ModelConfigBase
 
 
 class LightningModuleBase(pl.LightningModule):
-    # This is a base class of customized LightningModule variants with commonly features are pre-implemented.
+    # This is a base class of customized LightningModule variants with common features are pre-implemented.
     def __init__(self, config: ModelConfigBase, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
