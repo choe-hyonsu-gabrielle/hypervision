@@ -96,7 +96,7 @@ if __name__ == '__main__':
     samples = dict(texts=['테스트를 해볼까요?', '테스트가 잘 되네요~'], targets=[[1, 0], [0, 1]], labels=[0, 1])
 
     tokens_a = model.pretrained_tokenizer.tokenize(samples['texts'][0], add_special_tokens=True)
-    tokens_b = model.pretrained_tokenizer.tokenize(samples['texts'][-1], add_special_tokens=True)
+    tokens_b = model.pretrained_tokenizer.tokenize(samples['texts'][1], add_special_tokens=True)
     print(tokens_a, tokens_b)
     # ['[CLS]', '테스트', '##를', '해볼', '##까요', '?', '[SEP]'] ['[CLS]', '테스트', '##가', '잘', '되네요', '~', '[SEP]']
 
