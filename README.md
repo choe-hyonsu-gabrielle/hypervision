@@ -20,9 +20,9 @@ in the configuration class. (See `BertClassifierConfig` as an example.)
 you can simply initialize a model object, which is actually `pl.LightningModule` at the core, by passing
 a model config object that you've just implemented.
 
-- Please be noticed that `config.ModelConfigBase` holds all of pretrained language model (`AutoModel`) and 
-tokenizer (`AutoTokenizer`) from `transformers` at first. Then `model.LightningModuleBase` will automatically 
-load the pretrained artifacts from model config object you've just passed to.
+- Please be noticed that `config.ModelConfigBase` holds all of pretrained artifacts (`AutoModel` and `AutoTokenizer`) from
+`transformers` at first. Then `model.LightningModuleBase` will automatically load the pretrained artifacts from model
+config object you've just passed to.
 
 ```python
 from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
