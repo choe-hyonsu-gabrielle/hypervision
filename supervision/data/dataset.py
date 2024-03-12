@@ -8,7 +8,7 @@ class DatasetBase(Dataset):
     def __init__(self, filenames: list[str]):
         self.filenames = filepath_resolution(filenames)
         print(f'[{self.__class__.__name__}] initializing Dataset from: {self.filenames}')
-        self.data = None
+        self.data: list[dict] = None
 
     def __len__(self):
         return len(self.data)
