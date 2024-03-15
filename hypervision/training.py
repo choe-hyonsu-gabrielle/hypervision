@@ -3,7 +3,7 @@ import torch
 import pytorch_lightning as pl
 from hypervision.session import HypervisionSession
 from supervision.data.datamodule import BaselineCSVsDataModule
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.bert_classifier_kit import BertClassifierConfig, BertClassifierModel
 
 
 # huggingface/tokenizers: The current process just got forked, after parallelism has already been used.
