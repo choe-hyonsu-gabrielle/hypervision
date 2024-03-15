@@ -4,7 +4,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from supervision.data.datamodule import BaselineCSVsDataModule
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.bert_classifier_kit import BertClassifierConfig, BertClassifierModel
 
 
 # This is just an example of single training event with Pytorch Lightning.
