@@ -1,6 +1,4 @@
-import os
 import glob
-import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from supervision.data.datamodule import BaselineCSVsDataModule
