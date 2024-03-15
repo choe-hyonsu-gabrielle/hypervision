@@ -2,7 +2,7 @@
 
 ### Requirements
 ```shell
-$ pip install transformers lightnings tensorboard tensorboardX scikit-learn
+$ pip install transformers lightning tensorboard tensorboardX scikit-learn
 ```
 
 ***
