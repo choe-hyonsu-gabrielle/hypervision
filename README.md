@@ -8,13 +8,11 @@ $ pip install transformers lightning tensorboard tensorboardX scikit-learn
 ***
 ### About `supervision`
 
-- `supervision` contains base classes for model architecture and training. `supervision.modeling` has basic model kits,
-which comprises a couple of model (a subclass of `model.LightningModuleBase`) and its configuration
-(a subclass of `config.ModelConfigBase`)
+- `supervision` contains `LightningModule`-based classes for model architecture and training. `supervision.modeling` has basic model kits,
+which comprises a couple of model (a subclass of `model.LightningModuleBase`) and its configuration (a subclass of `config.ModelConfigBase`)
  
 - It is very encouraged to make your own model kits under `supervision.modeling`.
-You can easily place activation, objective, learning rate scheduler and whatever you want to put in your model
-in the configuration class. (See `BertClassifierConfig` as an example.)
+You can easily place whatever you want to put in your model in the configuration class such as activation, objective and learning rate scheduler (See `BertClassifierConfig` as an example.)
 
 - Once you defined your original model class (ex. `BertClassifierModel`) and model config class (ex. `BertClassifierConfig`),
 you can simply initialize a model object, which is actually `pl.LightningModule` at the core, by passing
