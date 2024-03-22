@@ -43,6 +43,9 @@ class HypervisionSession:
             'strategy': 'ddp_find_unused_parameters_true'  # or 'auto'
         }
 
+        # model restructuring
+        self.additional_special_tokens: list[str] = None
+
         # constants
         self.random_seed: int = 42
         self.checkpoints_dir: str = 'checkpoints'  # logging & checkpoint directory
@@ -85,7 +88,8 @@ class HypervisionSession:
             test_dir=dataset_param['test'],
             train_validation_ratio=dataset_param['train_validation_split'],
             callback_params=self.callback_params,
-            trainer_params=self.trainer_params
+            trainer_params=self.trainer_params,
+            additional_special_tokens=self.additional_special_tokens
         )
 
     @property
@@ -117,7 +121,8 @@ class HypervisionSession:
 class SupervisionSession:
     def __init__(self, hypervisor: HypervisionSession, session_name: str, pretrained_model_name_or_path: str, batch_size: int,
                  learning_rate: float, num_classes: int, train_dir: (str, list[str]), validation_dir: (str, list[str]),
-                 test_dir: (str, list[str]), train_validation_ratio: dict, callback_params: dict, trainer_params: dict):
+                 test_dir: (str, list[str]), train_validation_ratio: dict, callback_params: dict, trainer_params: dict,
+                 additional_special_tokens: list[str]):
         self.hypervisor = hypervisor
         self.session_name = session_name
         self.version = 'NOT_INITIALIZED_YET'
@@ -127,6 +132,7 @@ class SupervisionSession:
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.batch_size = batch_size
         self.learning_rate = learning_rate
+        self.additional_special_tokens = additional_special_tokens
 
         # dataset configurations
         self.num_classes = num_classes
