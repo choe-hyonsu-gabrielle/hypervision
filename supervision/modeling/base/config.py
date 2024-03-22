@@ -42,6 +42,7 @@ class ModelConfigBase:
             print(f'[{self.__class__.__name__}] loading pretrained tokenizer of `{self.pretrained_model_name_or_path}`')
             self._pretrained_tokenizer = AutoTokenizer.from_pretrained(self.pretrained_model_name_or_path)
             if self.additional_special_tokens:
+                print(f'[{self.__class__.__name__}] appending special tokens: {self.additional_special_tokens}')
                 self._pretrained_tokenizer.add_special_tokens(self.additional_special_tokens)
         return self._pretrained_tokenizer
 
@@ -51,5 +52,6 @@ class ModelConfigBase:
             print(f'[{self.__class__.__name__}] loading pretrained model of `{self.pretrained_model_name_or_path}`')
             self._pretrained_model = AutoModel.from_pretrained(self.pretrained_model_name_or_path)
             if self.additional_special_tokens and self._pretrained_tokenizer is not None:
+                print(f'[{self.__class__.__name__}] resizing token embeddings to: {len(self._pretrained_tokenizer)}')
                 self._pretrained_model.resize_token_embeddings(len(self._pretrained_tokenizer))
         return self._pretrained_model
