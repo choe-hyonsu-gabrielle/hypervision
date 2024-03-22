@@ -2,7 +2,7 @@ from transformers import AutoConfig, AutoTokenizer, AutoModel
 
 
 class ModelConfigBase:
-    def __init__(self, pretrained_model_name_or_path: str, additional_special_tokens: list[str] = None):
+    def __init__(self, pretrained_model_name_or_path: str, additional_special_tokens: dict[str, str] = None):
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.additional_special_tokens = additional_special_tokens
         self._pretrained_config = None
