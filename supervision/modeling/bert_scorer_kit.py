@@ -5,8 +5,9 @@ from supervision.modeling.base.model import LightningModuleBase
 
 
 class BertScorerConfig(ModelConfigBase):
-    def __init__(self, pretrained_model_name_or_path: str, batch_size: int = 32, learning_rate: float = 1e-5):
-        super().__init__(pretrained_model_name_or_path)
+    def __init__(self, pretrained_model_name_or_path: str, batch_size: int = 32, learning_rate: float = 1e-5,
+                 additional_special_tokens: list[str] = None):
+        super().__init__(pretrained_model_name_or_path, additional_special_tokens)
 
         # pre-determined hyper-params of pretrained model
         self.pretrained_model_hidden_size = self.pretrained_config.hidden_size
