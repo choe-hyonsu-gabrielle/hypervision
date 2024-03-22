@@ -2,8 +2,9 @@ from transformers import AutoConfig, AutoTokenizer, AutoModel
 
 
 class ModelConfigBase:
-    def __init__(self, pretrained_model_name_or_path: str):
+    def __init__(self, pretrained_model_name_or_path: str, additional_special_tokens: list[str] = None):
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
+        self.additional_special_tokens = additional_special_tokens
         self._pretrained_config = None
         self._pretrained_tokenizer = None
         self._pretrained_model = None
@@ -40,6 +41,8 @@ class ModelConfigBase:
         if self._pretrained_tokenizer is None:
             print(f'[{self.__class__.__name__}] loading pretrained tokenizer of `{self.pretrained_model_name_or_path}`')
             self._pretrained_tokenizer = AutoTokenizer.from_pretrained(self.pretrained_model_name_or_path)
+            if self.additional_special_tokens:
+                self._pretrained_tokenizer.add_special_tokens(self.additional_special_tokens)
         return self._pretrained_tokenizer
 
     @property
@@ -47,4 +50,6 @@ class ModelConfigBase:
         if self._pretrained_model is None:
             print(f'[{self.__class__.__name__}] loading pretrained model of `{self.pretrained_model_name_or_path}`')
             self._pretrained_model = AutoModel.from_pretrained(self.pretrained_model_name_or_path)
+            if self.additional_special_tokens and self._pretrained_tokenizer is not None:
+                self._pretrained_model.resize_token_embeddings(len(self._pretrained_tokenizer))
         return self._pretrained_model
