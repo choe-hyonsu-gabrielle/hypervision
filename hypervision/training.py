@@ -44,12 +44,14 @@ class HyperParameterTuning(HypervisionSession):
             'monitor': 'valid_loss',
             'mode': 'min',
             'patience': 5,
+            'min_delta': 0.00001
         }
         self.trainer_params: dict = {
             'max_epochs': 20,
             'devices': [0, 1, 2, 3],                        # gpu device ids for pl.Trainer
             'strategy': 'ddp_find_unused_parameters_true',  # when you are using BERT
             # 'strategy': 'auto',
+            'log_every_n_steps': 50
         }
         self.random_seed: int = 42
         self.checkpoints_dir: str = 'checkpoints'           # logging & checkpoint directory
@@ -77,7 +79,7 @@ if __name__ == '__main__':
         model = BertClassifierModel(config=config)
 
         # This is an independent DataModule.
-        datamodule = HateSpeechBaselineCSVsDataModule(
+        datamodule = BaselineCSVsDataModule(
             train_dir=session.train_dir,
             validation_dir=session.validation_dir,
             test_dir=session.test_dir,
@@ -93,7 +95,8 @@ if __name__ == '__main__':
             devices=session.trainer_params['devices'],
             strategy=session.trainer_params['strategy'],
             callbacks=session.callbacks,
-            logger=session.tensorboard_logger
+            logger=session.tensorboard_logger,
+            log_every_n_steps=session.trainer_params['log_every_n_steps']
         )
 
         # LET'S GO!!!
