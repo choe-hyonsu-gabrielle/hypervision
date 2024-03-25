@@ -36,11 +36,13 @@ class HypervisionSession:
             'monitor': 'valid_loss',
             'mode': 'min',
             'patience': 5,
+            'min_delta': 0.00001
         }
         self.trainer_params: dict = {
             'max_epochs': 20,
             'devices': [0, 1, 2, 3],  # gpu device ids for pl.Trainer
             'strategy': 'ddp_find_unused_parameters_true'  # or 'auto'
+            'log_every_n_steps': 20
         }
 
         # model restructuring
@@ -197,7 +199,7 @@ class SupervisionSession:
             EarlyStopping(
                 monitor=self.callback_params['monitor'],
                 mode=self.callback_params['mode'],
-                min_delta=0.00001,
+                min_delta=self.callback_params['min_delta'],
                 patience=self.callback_params['patience'],
                 verbose=True,
                 check_finite=True
