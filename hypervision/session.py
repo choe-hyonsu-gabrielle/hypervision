@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+from typing import Optional
 from itertools import product
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -127,7 +128,7 @@ class SupervisionSession:
                  additional_special_tokens: list[str]):
         self.hypervisor = hypervisor
         self.session_name = session_name
-        self.version = 'NOT_INITIALIZED_YET'
+        self.version = 'NOT_DETERMINED_YET'
         self.trial_no = None
 
         # personalized hyperparameters
@@ -178,7 +179,13 @@ class SupervisionSession:
         contents = {k: v for k, v in self.__dict__.items() if k in ('session_name', 'version', 'trial_no',)}
         return f'[{self.__class__.__name__}] {contents}'
 
-    def initialize(self):
+    def __enter__(self):
+        self.initiate()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.terminate()
+
+    def initiate(self):
         # initiate version, loggers and callbacks
         self.started_at = datetime.datetime.now()
         self.version = self.started_at.strftime("v%y%m%d-%p%H%M")
@@ -209,8 +216,15 @@ class SupervisionSession:
         self.trainer_params['logger'] = self.tensorboard_logger
         self.trial_no = f'{self.hypervisor.supervision_sessions.index(self) + 1}/{len(self.hypervisor.supervision_sessions)}'
         self.hypervisor.event_logger.info(
-            f'[{self.hypervisor.__class__.__name__}] initialize `{self.session_name}` (trial {self.trial_no}): {str(self)}'
+            f'[{self.hypervisor.__class__.__name__}] initiate `{self.session_name}` (trial {self.trial_no}): {str(self)}'
         )
+
+    @property
+    def checkpoint_callback(self) -> Optional[ModelCheckpoint]:
+        for callback in self.callbacks:
+            if isinstance(callback, ModelCheckpoint):
+                return callback
+        return None
 
     def description(self, as_dict: bool = False):
         desc = dict(hypervision_configuration=dict(), supervision_configuration=dict())
@@ -226,14 +240,15 @@ class SupervisionSession:
             return json.loads(serialized)
         return serialized
 
-    def terminate(self, save_description: bool = None):
+    def terminate(self, save_description: bool = True):
         self.ended_at = datetime.datetime.now()
         self.elapsed_time = str(self.ended_at - self.started_at)
-        desc = dict()
-        checkpoint_callback: ModelCheckpoint = self.callbacks[0]    # callbacks.model_checkpoint.ModelCheckpoint
-        desc['best_model_path'] = checkpoint_callback.best_model_path
-        desc['best_model_score'] = checkpoint_callback.best_model_score
-        desc['elapsed_time'] = self.elapsed_time
+        checkpoint_callback = self.checkpoint_callback    # callbacks.model_checkpoint.ModelCheckpoint
+        desc = dict(
+            best_model_path=checkpoint_callback.best_model_path,
+            best_model_score=checkpoint_callback.best_model_score,
+            elapsed_time=self.elapsed_time
+        )
         session_description = self.description(as_dict=True)
         desc.update(session_description)
         if save_description:
@@ -242,9 +257,9 @@ class SupervisionSession:
         self.hypervisor.reception(desc)
         self.hypervisor.event_logger.info(
             f'[{self.hypervisor.__class__.__name__}] terminate `{self.session_name}` (trial {self.trial_no}): {str(self)}\n'
-            f'[{self.hypervisor.__class__.__name__}] best_model_path: {desc["best_model_path"]}\n'
-            f'[{self.hypervisor.__class__.__name__}] best_model_score: {desc["best_model_score"]}\n'
-            f'[{self.hypervisor.__class__.__name__}] elapsed_time: {desc["elapsed_time"]}'
+            f'[{self.hypervisor.__class__.__name__}] best_model_path: {checkpoint_callback.best_model_path}\n'
+            f'[{self.hypervisor.__class__.__name__}] best_model_score: {checkpoint_callback.best_model_score}\n'
+            f'[{self.hypervisor.__class__.__name__}] elapsed_time: {self.elapsed_time}\n'
         )
 
 
@@ -252,6 +267,6 @@ if __name__ == '__main__':
     hypervisor = HypervisionSession(session_name='DEMO')
 
     for session in hypervisor.supervision_sessions:
-        session.initialize()
+        session.initiate()
         # do something training a model with a supervision session
         session.terminate()
