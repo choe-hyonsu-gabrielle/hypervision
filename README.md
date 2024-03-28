@@ -77,7 +77,7 @@ hypervisor = HypervisionSession(session_name='DEMO')
  
 for session in hypervisor.supervision_sessions:
     # begin of supervision session: it will internally set up callbacks and tensorboard logger.
-    session.initialize()
+    session.initiate()
      
     # put your supervision codes under the loop.
     config = BertClassifierConfig(**session.model_params)                 # custom model config
@@ -91,6 +91,17 @@ for session in hypervisor.supervision_sessions:
     session.terminate()
  
 best_model = hypervisor.best_scored_session  # end of hyperparameter tuning loop.
+```
+- ... or simply use `with`.
+```python
+for session in hypervisor.supervision_sessions:
+    with session:
+        config = BertClassifierConfig(**session.model_params)                 # custom model config
+        model = BertClassifierModel(config)                                   # pl.LightningModule
+        datamodule = BaselineCSVsDataModule(**session.datamodule_params)      # pl.LightningDataModule
+         
+        trainer = pl.Trainer(**session.trainer_params)
+        trainer.fit(model, datamodule)
 ```
 
 ***
