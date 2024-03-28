@@ -56,7 +56,7 @@ if __name__ == '__main__':
         max_epochs=20,
         accelerator='auto',
         devices=[0, 1, 2, 3],
-        strategy='ddp_find_unused_parameters_true',
+        strategy='auto',
         callbacks=callbacks,
         logger=tensorboard_logger
     )
