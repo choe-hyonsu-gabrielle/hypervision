@@ -65,7 +65,7 @@ if __name__ == '__main__':
     # This is just a grid-search hyperparameter tuning loop. You get sub-sessions here ...
     for session in hypervisor.supervision_sessions:
         # ... and start a sub-session explicitly.
-        session.initialize()
+        session.initiate()
 
         # This is an independent model config. All args you need are stored in `session`.
         config = BertClassifierConfig(
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         trainer.fit(model=model, datamodule=datamodule)
 
         # ... and close the sub-session.
-        session.terminate(save_description=True)
+        session.terminate()
 
     # checkpoints are automatically saved by callback.
     print(hypervisor.best_scored_session)
