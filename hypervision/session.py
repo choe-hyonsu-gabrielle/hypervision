@@ -72,7 +72,7 @@ class HypervisionSession:
         # any sanity checking functions you want
         pass
 
-    def _personalize(self, model_name, dataset_param, batch_size, learning_rate):
+    def _individualize(self, model_name, dataset_param, batch_size, learning_rate):
         supervision_session_name = '.'.join([
             self.session_name,                          # using hypervisor session name as a prefix
             model_name,                                 # any '/' in model name will be replaced with '-'
@@ -100,7 +100,7 @@ class HypervisionSession:
         if not self._supervision_sessions:
             for model_name, dataset_param in product(self.model_names, self.dataset_params):
                 for batch_size, learning_rate in product(self.hyperparams['batch_size'], self.hyperparams['learning_rate']):
-                    supervision_session = self._personalize(model_name, dataset_param, batch_size, learning_rate)
+                    supervision_session = self._individualize(model_name, dataset_param, batch_size, learning_rate)
                     self._supervision_sessions.append(supervision_session)
         return self._supervision_sessions
 
