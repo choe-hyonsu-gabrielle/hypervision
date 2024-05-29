@@ -18,7 +18,7 @@ if __name__ == '__main__':
         **{'config': config}
     )
 
-    datamodule = BaselineCSVsDataModule(test_dir=['../supervision/data/corpus/baselines/test.csv'], batch_size=32)
+    datamodule = BaselineCSVsDataModule(test_dir=['../data/corpus/baselines/test.csv'], batch_size=32)
     datamodule.setup('test')
 
     ground_truth = []
