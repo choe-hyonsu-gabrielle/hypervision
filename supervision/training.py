@@ -1,7 +1,7 @@
 import glob
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
-from supervision.data.datamodule import BaselineCSVsDataModule
+from data.datamodule import BaselineCSVsDataModule
 from supervision.modeling.bert_classifier_kit import BertClassifierConfig, BertClassifierModel
 
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # This is an independent DataModule.
     datamodule = BaselineCSVsDataModule(
-        train_dir=glob.glob('data/corpus/baselines/train/*.csv'),
+        train_dir=glob.glob('../data/corpus/baselines/train/*.csv'),
         batch_size=64,
         train_validation_ratio={'train': 0.9, 'validation': 0.1},
         random_seed=42
