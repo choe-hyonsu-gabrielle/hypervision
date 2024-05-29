@@ -1,8 +1,8 @@
 import os
 import torch
 import pytorch_lightning as pl
+from data.datamodule import BaselineCSVsDataModule
 from hypervision.session import HypervisionSession
-from supervision.data.datamodule import BaselineCSVsDataModule
 from supervision.modeling.bert_classifier_kit import BertClassifierConfig, BertClassifierModel
 
 
