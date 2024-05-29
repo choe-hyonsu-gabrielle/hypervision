@@ -43,7 +43,7 @@ custom collator function. (See `collator.BaselineCSVsCollator` as an example.)
 ```python
 import pytorch_lightning as pl
 from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
-from supervision.data.datamodule import BaselineCSVsDataModule
+from data.datamodule import BaselineCSVsDataModule
  
 # loading model & data
 config = BertClassifierConfig(**model_params)                   # custom model config
@@ -71,7 +71,7 @@ under the `for` loop which is motivated by `HypervisionSession.supervision_sessi
 import pytorch_lightning as pl
 from hypervision.session import HypervisionSession
 from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
-from supervision.data.datamodule import BaselineCSVsDataModule
+from data.datamodule import BaselineCSVsDataModule
 
 hypervisor = HypervisionSession(session_name='DEMO')
  
