@@ -2,7 +2,7 @@ import os
 import glob
 import warnings
 from sklearn.metrics import classification_report
-from supervision.data.datamodule import BaselineCSVsDataModule
+from data.datamodule import BaselineCSVsDataModule
 from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
 
 warnings.filterwarnings(action='ignore')
