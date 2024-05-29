@@ -30,7 +30,7 @@ class HyperParameterTuning(HypervisionSession):
             {
                 'name': 'baseline.v1',
                 'num_classes': 2,
-                'train': '../supervision/data/corpus/baselines/*.csv',
+                'train': '../data/corpus/baselines/*.csv',
                 'validation': None,
                 'test': None,
                 'train_validation_split': {'train': 0.9, 'validation': 0.1}
