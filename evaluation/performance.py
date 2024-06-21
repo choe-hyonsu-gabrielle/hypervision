@@ -3,16 +3,16 @@ import glob
 import warnings
 from sklearn.metrics import classification_report
 from data.datamodule import BaselineCSVsDataModule
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
 warnings.filterwarnings(action='ignore')
 
 
 if __name__ == '__main__':
-    config = BertClassifierConfig(pretrained_model_name_or_path='klue/bert-base', num_classes=2)
+    config = SentenceClassificationConfig(pretrained_model_name_or_path='klue/bert-base', num_classes=2)
     # It will not load immediately bare pretrained model from HuggingFace Hub until requested.
 
-    model = BertClassifierModel.load_from_checkpoint(
+    model = SentenceClassificationModel.load_from_checkpoint(
         checkpoint_path='../hypervision/checkpoints/YOUR_AWESOME_CHECKPOINT.ckpt',
         map_location={'cuda:0': 'cuda:0'},
         **{'config': config}
