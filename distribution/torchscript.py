@@ -18,7 +18,7 @@ def batch_tokenize(tokenizer: BertTokenizer, list_of_texts: list[str]):
     )
 
 
-class ModelForTritonBackend(LightningModule):
+class ModelForServiceBackend(LightningModule):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pretrained_model = BertModel.from_pretrained('klue/bert-base')
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     tokenizer = BertTokenizer.from_pretrained('klue/bert-base')
     print(tokenizer)
 
-    model = ModelForTritonBackend.load_from_checkpoint(
+    model = ModelForServiceBackend.load_from_checkpoint(
         checkpoint_path='../checkpoints/YOUR_AWESOME_CHECKPOINT.ckpt',
         map_location={'cuda:0': 'cuda:0'}
     )
