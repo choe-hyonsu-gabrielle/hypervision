@@ -36,17 +36,17 @@ class LightningModuleBase(pl.LightningModule):
 
     def training_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
         loss = self.batch_forward_and_loss(samples)
-        self.log(name='train_loss', value=loss, prog_bar=True, sync_dist=True)
+        self.log(name='train/loss', value=loss, prog_bar=True, sync_dist=True)
         if self.config.lr_scheduler:
             self.log('learning_rate', self.lr_schedulers().get_last_lr()[0], prog_bar=True, sync_dist=True)
         return dict(loss=loss)
 
     def validation_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
         loss = self.batch_forward_and_loss(samples)
-        self.log(name='valid_loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
+        self.log(name='valid/loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
         return dict(loss=loss)
 
     def test_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
         loss = self.batch_forward_and_loss(samples)
-        self.log(name='test_loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
+        self.log(name='test/loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
         return dict(loss=loss)
