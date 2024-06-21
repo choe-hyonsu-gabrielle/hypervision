@@ -14,7 +14,7 @@ which comprises a couple of model (a subclass of `model.LightningModuleBase`) an
 - It is very encouraged to make your own model kits under `supervision.modeling`.
 You can easily place whatever you want to put in your model in the configuration class such as activation, objective and learning rate scheduler (See `BertClassifierConfig` as an example.)
 
-- Once you defined your original model class (ex. `BertClassifierModel`) and model config class (ex. `BertClassifierConfig`),
+- Once you defined your original model class (ex. `SentenceClassificationModel`) and model config class (ex. `SentenceClassificationConfig`),
 you can simply initialize a model object, which is actually `pl.LightningModule` at the core, by passing
 a model config object that you've just implemented.
 
@@ -23,16 +23,17 @@ a model config object that you've just implemented.
 config object you've just passed to.
 
 ```python
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
-config = BertClassifierConfig(
+config = SentenceClassificationConfig(
     pretrained_model_name_or_path='klue/bert-base',  # AutoTokenizer & AutoModel are prepared to be fed to model later.
     num_classes=2,
     batch_size=32,
-    learning_rate=1e-5
+    learning_rate=1e-5,
+    pooling_strategy='cls'
 )
 
-model = BertClassifierModel(config)  # model initiated with pretrained artifacts from config.
+model = SentenceClassificationModel(config)  # model initiated with pretrained artifacts from config.
 ```
 - `supervision.data` has all codes for training and evaluation data. You need to define custom `DatasetBase`, 
 (a subclass of `Dataset` from `torch`) `DataModuleBase` (a subclass of `pl.LightningDataModule`) and
@@ -42,12 +43,12 @@ custom collator function. (See `collator.BaselineCSVsCollator` as an example.)
 - You can see detailed, working code example of single training event at `supervision/training.py`.
 ```python
 import pytorch_lightning as pl
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 from data.datamodule import BaselineCSVsDataModule
  
 # loading model & data
-config = BertClassifierConfig(**model_params)                   # custom model config
-model = BertClassifierModel(config)                             # pl.LightningModule
+config = SentenceClassificationConfig(**model_params)           # custom model config
+model = SentenceClassificationModel(config)                     # pl.LightningModule
 datamodule = BaselineCSVsDataModule(**datamodule_params)        # pl.LightningDataModule
  
 # trainer
@@ -66,11 +67,11 @@ required by `config`, `model`, `datamodule` and `trainer` at every individual se
 under the `for` loop which is motivated by `HypervisionSession.supervision_sessions`.
 
 #### Basic hyperparameter tuning with `hypervision`
-- You can see detailed, working code example of hyperparameter tuning at `hypervision/training.py`.
+- You can see detailed, working code example of hyperparameter tuning at `hypervision/tuning.py`.
 ```python
 import pytorch_lightning as pl
 from hypervision.session import HypervisionSession
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 from data.datamodule import BaselineCSVsDataModule
 
 hypervisor = HypervisionSession(session_name='DEMO')
@@ -80,9 +81,9 @@ for session in hypervisor.supervision_sessions:
     session.initiate()
      
     # put your supervision codes under the loop.
-    config = BertClassifierConfig(**session.model_params)                 # custom model config
-    model = BertClassifierModel(config)                                   # pl.LightningModule
-    datamodule = BaselineCSVsDataModule(**session.datamodule_params)      # pl.LightningDataModule
+    config = SentenceClassificationConfig(**session.model_params)              # custom model config
+    model = BertClassifierModel(config)                                        # pl.LightningModule
+    datamodule = SentenceClassificationModel(**session.datamodule_params)      # pl.LightningDataModule
      
     trainer = pl.Trainer(**session.trainer_params)
     trainer.fit(model, datamodule)
@@ -96,9 +97,9 @@ best_model = hypervisor.best_scored_session  # end of hyperparameter tuning loop
 ```python
 for session in hypervisor.supervision_sessions:
     with session:
-        config = BertClassifierConfig(**session.model_params)                 # custom model config
-        model = BertClassifierModel(config)                                   # pl.LightningModule
-        datamodule = BaselineCSVsDataModule(**session.datamodule_params)      # pl.LightningDataModule
+        config = SentenceClassificationConfig(**session.model_params)              # custom model config
+        model = BertClassifierModel(config)                                        # pl.LightningModule
+        datamodule = SentenceClassificationModel(**session.datamodule_params)      # pl.LightningDataModule
          
         trainer = pl.Trainer(**session.trainer_params)
         trainer.fit(model, datamodule)
@@ -107,12 +108,12 @@ for session in hypervisor.supervision_sessions:
 ***
 ### How to load finetuned model
 ```python
-from supervision.modeling.bert_model_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
-config = BertClassifierConfig(pretrained_model_name_or_path='klue/bert-base', num_classes=2)
+config = SentenceClassificationConfig(pretrained_model_name_or_path='klue/bert-base', num_classes=2)
 # It will not load immediately bare pretrained model from HuggingFace Hub until requested.
 
-model = BertClassifierModel.load_from_checkpoint(
+model = SentenceClassificationModel.load_from_checkpoint(
     checkpoint_path='../hypervision/checkpoints/YOUR_AWESOME_CHECKPOINT.ckpt',
     map_location={'cuda:0': 'cuda:0'},
     **{'config': config}
