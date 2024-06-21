@@ -18,4 +18,3 @@ def get_event_logger(logger_name: str, filename: str, console_print: bool = True
     if console_print:
         logger.addHandler(logging.StreamHandler())
     return logger
-  
