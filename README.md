@@ -81,9 +81,9 @@ for session in hypervisor.supervision_sessions:
     session.initiate()
      
     # put your supervision codes under the loop.
-    config = SentenceClassificationConfig(**session.model_params)              # custom model config
-    model = BertClassifierModel(config)                                        # pl.LightningModule
-    datamodule = SentenceClassificationModel(**session.datamodule_params)      # pl.LightningDataModule
+    config = SentenceClassificationConfig(**session.model_params)         # custom model config
+    model = SentenceClassificationModel(config)                           # pl.LightningModule
+    datamodule = BaselineCSVsDataModule(**session.datamodule_params)      # pl.LightningDataModule
      
     trainer = pl.Trainer(**session.trainer_params)
     trainer.fit(model, datamodule)
@@ -97,9 +97,9 @@ best_model = hypervisor.best_scored_session  # end of hyperparameter tuning loop
 ```python
 for session in hypervisor.supervision_sessions:
     with session:
-        config = SentenceClassificationConfig(**session.model_params)              # custom model config
-        model = BertClassifierModel(config)                                        # pl.LightningModule
-        datamodule = SentenceClassificationModel(**session.datamodule_params)      # pl.LightningDataModule
+        config = SentenceClassificationConfig(**session.model_params)         # custom model config
+        model = SentenceClassificationModel(config)                           # pl.LightningModule
+        datamodule = BaselineCSVsDataModule(**session.datamodule_params)      # pl.LightningDataModule
          
         trainer = pl.Trainer(**session.trainer_params)
         trainer.fit(model, datamodule)
