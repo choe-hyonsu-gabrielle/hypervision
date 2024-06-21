@@ -3,19 +3,22 @@ import torch
 import pytorch_lightning as pl
 from data.datamodule import BaselineCSVsDataModule
 from hypervision.session import HypervisionSession
-from supervision.modeling.bert_classifier_kit import BertClassifierConfig, BertClassifierModel
+from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
+
+torch.set_printoptions(edgeitems=10, linewidth=200)
+torch.set_num_threads(4)
+
+# when you are using a CUDA device ('NVIDIA A100-SXM4-40GB') that has Tensor Cores.
+torch.set_float32_matmul_precision('high')
 
 # huggingface/tokenizers: The current process just got forked, after parallelism has already been used.
 # Disabling parallelism to avoid deadlocks... To disable this warning, you can either:
-# - Avoid using `tokenizers` before the fork if possible
-# - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+# 	- Avoid using `tokenizers` before the fork if possible
+# 	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,"
-
-# when you are using a CUDA device ('NVIDIA A100-SXM4-40GB') that has tensor cores.
-torch.set_float32_matmul_precision('high')
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 
 # HypervisionSession class is just grid search hyperparameter tuner class.
@@ -25,23 +28,25 @@ class HyperParameterTuning(HypervisionSession):
         super().__init__(session_name)
         self.model_names: list[str] = [                 # list of pretrained_model_name_or_paths
             'klue/bert-base',
+            'klue/roberta-large'
         ]
         self.dataset_params: list[dict] = [             # list of dataset paths.
             {
                 'name': 'baseline.v1',
                 'num_classes': 2,
-                'train': '../data/corpus/baselines/*.csv',
+                'train': '../data/corpus/train/*.csv',
                 'validation': None,
-                'test': None,
+                'test': '../data/corpus/test/*.csv',
                 'train_validation_split': {'train': 0.9, 'validation': 0.1}
             },
         ]
         self.hyperparams: dict = {                       # hyperparameters to be distributed for each training session
             'batch_size': [64, 128],
             'learning_rate': [1e-5, 5e-5],
+            'pooling_strategy': ['cls']                  # ['cls', 'mean', 'max', 'pooler_output']
         }
         self.callback_params: dict = {
-            'monitor': 'valid_loss',
+            'monitor': 'valid/loss',
             'mode': 'min',
             'patience': 5,
             'min_delta': 0.00001
@@ -68,17 +73,20 @@ if __name__ == '__main__':
         session.initiate()
 
         # This is an independent model config. All args you need are stored in `session`.
-        config = BertClassifierConfig(
+        # config = SentenceClassificationConfig(**session.model_params)
+        config = SentenceClassificationConfig(
             pretrained_model_name_or_path=session.pretrained_model_name_or_path,
             num_classes=session.num_classes,
             batch_size=session.batch_size,
-            learning_rate=session.learning_rate
+            learning_rate=session.learning_rate,
+            pooling_strategy=session.pooling_strategy
         )
 
         # This is an independent LightningModule model.
-        model = BertClassifierModel(config=config)
+        model = SentenceClassificationModel(config=config)
 
         # This is an independent DataModule.
+        # datamodule = BaselineCSVsDataModule(**session.datamodule_params)
         datamodule = BaselineCSVsDataModule(
             train_dir=session.train_dir,
             validation_dir=session.validation_dir,
@@ -99,8 +107,14 @@ if __name__ == '__main__':
             log_every_n_steps=session.trainer_params['log_every_n_steps']
         )
 
+        # check if you want to full fine-tuning or not before start
+        model.train()
+        
         # LET'S GO!!!
         trainer.fit(model=model, datamodule=datamodule)
+
+        # you can append a test set loss on the session log
+        session.notes['trainer.test'] = trainer.test(model=model, datamodule=datamodule)
 
         # ... and close the sub-session.
         session.terminate()
