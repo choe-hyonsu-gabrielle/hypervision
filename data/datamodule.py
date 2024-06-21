@@ -3,8 +3,8 @@ from torch import Generator
 from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import TRAIN_DATALOADERS, EVAL_DATALOADERS
-from supervision.data.dataset import MultipleCSVsDataset
-from supervision.data.collator import BaselineCSVsCollator
+from data.dataset import MultipleCSVsDataset
+from data.collator import BaselineCSVsCollator
 
 
 class DataModuleBase(pl.LightningDataModule):
