@@ -1,12 +1,12 @@
 import os
 import json
 import datetime
-from typing import Optional
+from typing import Optional, Literal
 from itertools import product
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
-from utils.path import filepath_resolution
-from utils.logging import get_event_logger
+from utility.path import filepath_resolution
+from utility.logging import get_event_logger
 
 
 class HypervisionSession:
@@ -18,12 +18,13 @@ class HypervisionSession:
         self.session_name = session_name                # it will be used as an alias
         self.model_names: list[str] = [                 # list of pretrained_model_name_or_paths
             'klue/bert-base',
+            'klue/roberta-large'
         ]
         self.dataset_params: list[dict] = [             # list of dataset paths.
             {
                 'name': 'baseline.v1',
                 'num_classes': 2,
-                'train': '../data/corpus/baselines/*.csv',
+                'train': '../data/corpus/train/*.csv',
                 'validation': None,
                 'test': None,
                 'train_validation_split': {'train': 0.9, 'validation': 0.1}
@@ -32,9 +33,10 @@ class HypervisionSession:
         self.hyperparams: dict = {                      # hyperparameters to be distributed for each training session
             'batch_size': [16, 32, 64, 128],
             'learning_rate': [5e-6, 1e-5, 5e-5, 1e-4],
+            'pooling_strategy': ['cls', 'mean', 'max', 'pooler_output']
         }
         self.callback_params: dict = {
-            'monitor': 'valid_loss',
+            'monitor': 'valid/loss',
             'mode': 'min',
             'patience': 5,
             'min_delta': 0.00001
@@ -42,12 +44,12 @@ class HypervisionSession:
         self.trainer_params: dict = {
             'max_epochs': 20,
             'devices': [0, 1, 2, 3],  # gpu device ids for pl.Trainer
-            'strategy': 'ddp_find_unused_parameters_true'  # or 'auto'
-            'log_every_n_steps': 20
+            'strategy': 'auto'  # or 'ddp_find_unused_parameters_true'
+            'log_every_n_steps': 100
         }
 
         # model restructuring
-        self.additional_special_tokens: list[str] = None
+        self.additional_special_tokens: Optional[list[str]] = None
 
         # constants
         self.random_seed: int = 42
@@ -72,12 +74,12 @@ class HypervisionSession:
         # any sanity checking functions you want
         pass
 
-    def _individualize(self, model_name, dataset_param, batch_size, learning_rate):
+    def _individualize(self, model_name, dataset_param, batch_size, learning_rate, pooling_strategy):
         supervision_session_name = '.'.join([
             self.session_name,                          # using hypervisor session name as a prefix
             model_name,                                 # any '/' in model name will be replaced with '-'
             dataset_param['name'],                      # dataset_name
-            f'lr={learning_rate}.bs={batch_size}'       # learning_rate & batch_size as identifier
+            f'lr={learning_rate}.bs={batch_size}.ps={pooling_strategy}'  # learning_rate & batch_size as identifier
         ]).replace('/', '-')
         return SupervisionSession(
             hypervisor=self,
@@ -85,6 +87,7 @@ class HypervisionSession:
             pretrained_model_name_or_path=model_name,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            pooling_strategy=pooling_strategy,
             num_classes=dataset_param['num_classes'],
             train_dir=dataset_param['train'],
             validation_dir=dataset_param['validation'],
@@ -99,8 +102,13 @@ class HypervisionSession:
     def supervision_sessions(self) -> list['SupervisionSession']:
         if not self._supervision_sessions:
             for model_name, dataset_param in product(self.model_names, self.dataset_params):
-                for batch_size, learning_rate in product(self.hyperparams['batch_size'], self.hyperparams['learning_rate']):
-                    supervision_session = self._individualize(model_name, dataset_param, batch_size, learning_rate)
+                production_args = [
+                    self.hyperparams['batch_size'],
+                    self.hyperparams['learning_rate'],
+                    self.hyperparams['pooling_strategy']
+                ]
+                for batch_size, learning_rate, pooling_strategy in product(*production_args):
+                    supervision_session = self._individualize(model_name, dataset_param, batch_size, learning_rate, pooling_strategy)
                     self._supervision_sessions.append(supervision_session)
         return self._supervision_sessions
 
@@ -122,10 +130,10 @@ class HypervisionSession:
 
 
 class SupervisionSession:
-    def __init__(self, hypervisor: HypervisionSession, session_name: str, pretrained_model_name_or_path: str, batch_size: int,
-                 learning_rate: float, num_classes: int, train_dir: (str, list[str]), validation_dir: (str, list[str]),
-                 test_dir: (str, list[str]), train_validation_ratio: dict, callback_params: dict, trainer_params: dict,
-                 additional_special_tokens: list[str]):
+    def __init__(self, hypervisor: HypervisionSession, session_name: str, pretrained_model_name_or_path: str,
+                 batch_size: int, learning_rate: float, pooling_strategy: Literal['cls', 'mean', 'max', 'pooler_output'],
+                 num_classes: int, train_dir: (str, list[str]), validation_dir: (str, list[str]), test_dir: (str, list[str]),
+                 train_validation_ratio: dict, callback_params: dict, trainer_params: dict, additional_special_tokens: list[str]):
         self.hypervisor = hypervisor
         self.session_name = session_name
         self.version = 'NOT_DETERMINED_YET'
@@ -135,6 +143,7 @@ class SupervisionSession:
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.batch_size = batch_size
         self.learning_rate = learning_rate
+        self.pooling_strategy = pooling_strategy
         self.additional_special_tokens = additional_special_tokens
 
         # dataset configurations
@@ -154,6 +163,7 @@ class SupervisionSession:
         self.started_at = None
         self.ended_at = None
         self.elapsed_time = None
+        self.notes = dict()
 
     @property
     def model_params(self):
@@ -161,7 +171,8 @@ class SupervisionSession:
             pretrained_model_name_or_path=self.pretrained_model_name_or_path,
             num_classes=self.num_classes,
             batch_size=self.batch_size,
-            learning_rate=self.learning_rate
+            learning_rate=self.learning_rate,
+            pooling_strategy=self.pooling_strategy
         )
 
     @property
@@ -197,7 +208,7 @@ class SupervisionSession:
         self.callbacks = [
             ModelCheckpoint(
                 dirpath=self.hypervisor.checkpoints_dir,
-                filename='.'.join([self.session_name, self.version, 'epoch.{epoch}-vloss.{valid_loss:.5f}']),
+                filename='.'.join([self.session_name, self.version, 'epoch.{epoch}-vloss.{valid/loss:.5f}']),
                 monitor=self.callback_params['monitor'],
                 mode=self.callback_params['mode'],
                 auto_insert_metric_name=False,
@@ -247,7 +258,8 @@ class SupervisionSession:
         desc = dict(
             best_model_path=checkpoint_callback.best_model_path,
             best_model_score=checkpoint_callback.best_model_score,
-            elapsed_time=self.elapsed_time
+            elapsed_time=self.elapsed_time,
+            notes=self.notes
         )
         session_description = self.description(as_dict=True)
         desc.update(session_description)
@@ -260,6 +272,7 @@ class SupervisionSession:
             f'[{self.hypervisor.__class__.__name__}] best_model_path: {checkpoint_callback.best_model_path}\n'
             f'[{self.hypervisor.__class__.__name__}] best_model_score: {checkpoint_callback.best_model_score}\n'
             f'[{self.hypervisor.__class__.__name__}] elapsed_time: {self.elapsed_time}\n'
+            f'[{self.hypervisor.__class__.__name__}] notes: {self.notes}'
         )
 
 
