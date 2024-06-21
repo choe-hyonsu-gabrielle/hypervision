@@ -14,4 +14,3 @@ def filepath_resolution(filepath_or_pathlike: (str, list), absolute: bool = None
     if absolute:
         return [abspath(p) for p in filepaths]
     return filepaths
-  
