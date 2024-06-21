@@ -29,4 +29,3 @@ def load_csvs(filepaths: list[str], encoding: str = 'utf-8', flatten: bool = Fal
         else:
             results.extend(load_csv(filename=filepath, encoding=encoding))
     return results
-  
