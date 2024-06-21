@@ -38,9 +38,10 @@ class ModelForServiceBackend(LightningModule):
             pooled_outputs = self.pooler(encoder_outputs)
             output_logits = self.classifier(pooled_outputs)
             output_probs = torch.softmax(output_logits, dim=-1)
-            output_scores = output_probs[:, 1].squeeze()
+            # output_scores = output_probs[:, 1].squeeze()
+            output_labels = torch.argmax(batch_probs, dim=-1)
             torch.cuda.empty_cache()
-            return output_scores
+            return output_labels
 
 
 
