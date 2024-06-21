@@ -56,7 +56,7 @@ class SequenceScoringModel(LightningModuleBase):
             out_features=1
         ).to(self.device)
 
-    def tokenize(self, list_of_texts: list[str] | list[tuple[str, str]]):
+    def tokenize(self, list_of_texts: (list[str], list[tuple[str, str]])):
         encoded = self.pretrained_tokenizer.batch_encode_plus(
             batch_text_or_text_pairs=list_of_texts,
             add_special_tokens=True,
