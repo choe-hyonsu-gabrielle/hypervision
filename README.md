@@ -12,7 +12,7 @@ $ pip install transformers lightning tensorboard scikit-learn lit-nlp
 which comprises a couple of model (a subclass of `model.LightningModuleBase`) and its configuration (a subclass of `config.ModelConfigBase`)
  
 - It is very encouraged to make your own model kits under `supervision.modeling`.
-You can easily place whatever you want to put in your model in the configuration class such as activation, objective and learning rate scheduler (See `BertClassifierConfig` as an example.)
+You can easily place whatever you want to put in your model such as activation, objective and learning rate scheduler in the configuration class. (See `BertClassifierConfig` as an example.)
 
 - Once you defined your original model class (ex. `SentenceClassificationModel`) and model config class (ex. `SentenceClassificationConfig`),
 you can simply initialize a model object, which is actually `pl.LightningModule` at the core, by passing
