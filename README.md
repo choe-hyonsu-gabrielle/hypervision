@@ -2,7 +2,7 @@
 
 ### Requirements
 ```shell
-$ pip install transformers lightning tensorboard scikit-learn
+$ pip install transformers lightning tensorboard scikit-learn lit-nlp
 ```
 
 ***
@@ -30,7 +30,8 @@ config = SentenceClassificationConfig(
     num_classes=2,
     batch_size=32,
     learning_rate=1e-5,
-    pooling_strategy='cls'
+    pooling_strategy='cls',
+    max_seq_length='max'
 )
 
 model = SentenceClassificationModel(config)  # model initiated with pretrained artifacts from config.
