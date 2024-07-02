@@ -7,12 +7,12 @@ from supervision.modeling.base.model import LightningModuleBase
 class SentenceClassificationConfig(ModelConfigBase):
     def __init__(self, pretrained_model_name_or_path: str, num_classes: int = 2, batch_size: int = 32,
                  learning_rate: float = 1e-5, pooling_strategy: Literal['cls', 'mean', 'max', 'pooler_output'] = 'cls',
-                 additional_special_tokens: list[str] = None):
+                 max_seq_length: int = None, additional_special_tokens: list[str] = None):
         super().__init__(pretrained_model_name_or_path, additional_special_tokens)
 
         # pre-determined hyper-params of pretrained model
         self.pretrained_model_hidden_size = self.pretrained_config.hidden_size
-        self.pretrained_model_max_token_length = self.pretrained_config.max_position_embeddings
+        self.pretrained_model_max_seq_length = max_seq_length if max_seq_length else self.pretrained_config.max_position_embeddings
         self.num_classes = num_classes
 
         # Notes: these values are will be determined right before training
@@ -63,7 +63,7 @@ class SentenceClassificationModel(LightningModuleBase):
             add_special_tokens=True,
             padding=True,
             truncation=True,
-            max_length=self.config.pretrained_model_max_token_length,
+            max_length=self.config.pretrained_model_max_seq_length,
             return_tensors='pt'
         ).to(self.device)
         return encoded
