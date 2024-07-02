@@ -34,16 +34,17 @@ class HyperParameterTuning(HypervisionSession):
             {
                 'name': 'baseline.v1',
                 'num_classes': 2,
-                'train': '../data/corpus/train/*.csv',
+                'train': ['../data/corpus/train/*.csv'],
                 'validation': None,
-                'test': '../data/corpus/test/*.csv',
+                'test': ['../data/corpus/test/*.csv'],
                 'train_validation_split': {'train': 0.9, 'validation': 0.1}
             },
         ]
         self.hyperparams: dict = {                       # hyperparameters to be distributed for each training session
             'batch_size': [64, 128],
             'learning_rate': [1e-5, 5e-5],
-            'pooling_strategy': ['cls']                  # ['cls', 'mean', 'max', 'pooler_output']
+            'pooling_strategy': ['cls'],                 # ['cls', 'mean', 'max', 'pooler_output']
+            'max_seq_length': ['max']                    # `None` or 'max' means maximum sequence length
         }
         self.callback_params: dict = {
             'monitor': 'valid/loss',
@@ -79,7 +80,8 @@ if __name__ == '__main__':
             num_classes=session.num_classes,
             batch_size=session.batch_size,
             learning_rate=session.learning_rate,
-            pooling_strategy=session.pooling_strategy
+            pooling_strategy=session.pooling_strategy,
+            max_seq_length=session.max_seq_length
         )
 
         # This is an independent LightningModule model.
