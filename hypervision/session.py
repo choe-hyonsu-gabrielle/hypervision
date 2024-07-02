@@ -33,7 +33,8 @@ class HypervisionSession:
         self.hyperparams: dict = {                      # hyperparameters to be distributed for each training session
             'batch_size': [16, 32, 64, 128],
             'learning_rate': [5e-6, 1e-5, 5e-5, 1e-4],
-            'pooling_strategy': ['cls', 'mean', 'max', 'pooler_output']
+            'pooling_strategy': ['cls', 'mean', 'max', 'pooler_output'],
+            'max_seq_length': [None]
         }
         self.callback_params: dict = {
             'monitor': 'valid/loss',
@@ -74,12 +75,12 @@ class HypervisionSession:
         # any sanity checking functions you want
         pass
 
-    def _individualize(self, model_name, dataset_param, batch_size, learning_rate, pooling_strategy):
+    def _individualize(self, model_name, dataset_param, batch_size, learning_rate, pooling_strategy, max_seq_length):
         supervision_session_name = '.'.join([
             self.session_name,                          # using hypervisor session name as a prefix
             model_name,                                 # any '/' in model name will be replaced with '-'
             dataset_param['name'],                      # dataset_name
-            f'lr={learning_rate}.bs={batch_size}.ps={pooling_strategy}'  # learning_rate & batch_size as identifier
+            f'lr={learning_rate}.bs={batch_size}.ps={pooling_strategy}.mx={max_seq_length}'  # learning_rate & batch_size as identifier
         ]).replace('/', '-')
         return SupervisionSession(
             hypervisor=self,
@@ -88,6 +89,7 @@ class HypervisionSession:
             batch_size=batch_size,
             learning_rate=learning_rate,
             pooling_strategy=pooling_strategy,
+            max_seq_length=None if max_seq_length == 'max' else max_seq_length,
             num_classes=dataset_param['num_classes'],
             train_dir=dataset_param['train'],
             validation_dir=dataset_param['validation'],
@@ -105,10 +107,11 @@ class HypervisionSession:
                 production_args = [
                     self.hyperparams['batch_size'],
                     self.hyperparams['learning_rate'],
-                    self.hyperparams['pooling_strategy']
+                    self.hyperparams['pooling_strategy'],
+                    'max' if self.hyperparams['max_seq_length'] is None else self.hyperparams['max_seq_length']
                 ]
-                for batch_size, learning_rate, pooling_strategy in product(*production_args):
-                    supervision_session = self._individualize(model_name, dataset_param, batch_size, learning_rate, pooling_strategy)
+                for batch_size, learning_rate, pooling_strategy, max_seq_length in product(*production_args):
+                    supervision_session = self._individualize(model_name, dataset_param, batch_size, learning_rate, pooling_strategy, max_seq_length)
                     self._supervision_sessions.append(supervision_session)
         return self._supervision_sessions
 
@@ -132,8 +135,9 @@ class HypervisionSession:
 class SupervisionSession:
     def __init__(self, hypervisor: HypervisionSession, session_name: str, pretrained_model_name_or_path: str,
                  batch_size: int, learning_rate: float, pooling_strategy: Literal['cls', 'mean', 'max', 'pooler_output'],
-                 num_classes: int, train_dir: (str, list[str]), validation_dir: (str, list[str]), test_dir: (str, list[str]),
-                 train_validation_ratio: dict, callback_params: dict, trainer_params: dict, additional_special_tokens: list[str]):
+                 max_seq_length: Optional[int], num_classes: int, train_dir: (str, list[str]), validation_dir: (str, list[str]),
+                 test_dir: (str, list[str]), train_validation_ratio: dict, callback_params: dict, trainer_params: dict,
+                 additional_special_tokens: list[str]):
         self.hypervisor = hypervisor
         self.session_name = session_name
         self.version = 'NOT_DETERMINED_YET'
@@ -144,6 +148,7 @@ class SupervisionSession:
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.pooling_strategy = pooling_strategy
+        self.max_seq_length = max_seq_length
         self.additional_special_tokens = additional_special_tokens
 
         # dataset configurations
@@ -172,7 +177,8 @@ class SupervisionSession:
             num_classes=self.num_classes,
             batch_size=self.batch_size,
             learning_rate=self.learning_rate,
-            pooling_strategy=self.pooling_strategy
+            pooling_strategy=self.pooling_strategy,
+            max_seq_length=self.max_seq_length
         )
 
     @property
