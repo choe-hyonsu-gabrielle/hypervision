@@ -55,7 +55,7 @@ class LITModel(Model):
         input_chunks = [inputs[i * n:(i + 1) * n] for i in range((len(inputs) + n - 1) // n)]
         outputs = []
         for batch in input_chunks:
-            tokens = [' '.join(self._model.pretrained_tokenizer(i['text'], add_special_tokens=True)) for i in batch]
+            batched_tokens = [list(self._model.pretrained_tokenizer(i['text'], add_special_tokens=True)) for i in batch]
             with torch.no_grad():
                 batch_inputs = self._model.tokenize(list_of_texts=[i['text'] for i in batch])
                 encoder_outputs = self._model.pretrained_model(
@@ -64,10 +64,10 @@ class LITModel(Model):
                     output_hidden_states=True
                 )
                 pooler_outputs = self._model.pooler(encoder_outputs)
-                probs = self._model.config.activation(self._model.classifier(pooler_outputs)).cpu().numpy()
-                embeddings = pooler_outputs.cpu().numpy()
-            for input_id, (tok, emb, prob) in enumerate(zip(tokens, embeddings, probs)):
-                out = dict(probs=prob, embeddings=emb, tokens=tok)
+                batched_probs = self._model.config.activation(self._model.classifier(pooler_outputs)).cpu().numpy()
+                batched_cls = pooler_outputs.cpu().numpy()
+            for input_id, (tok, cls, prob) in enumerate(zip(batched_tokens, batched_cls, batched_probs)):
+                out = dict(probs=prob, output_embs=cls, tokens=tok)
                 outputs.append(out)
             torch.cuda.empty_cache()
         return outputs
@@ -78,7 +78,7 @@ class LITModel(Model):
     def output_spec(self) -> dict[str, types.LitType]:
         spec = dict(
             probs=types.MulticlassPreds(vocab=LABELS, parent='label'),
-            embeddings=types.Embeddings(),       # <float>[emb_dim]: cls vector
+            output_embs=types.Embeddings(),       # <float>[emb_dim]: cls vector
             tokens=types.Tokens(parent='text'),  # list[str]
         )
         return spec
