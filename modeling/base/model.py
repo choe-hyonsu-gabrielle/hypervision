@@ -4,7 +4,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import OptimizerLRScheduler, STEP_OUTPUT
 from transformers import PreTrainedModel, PreTrainedTokenizer
-from supervision.modeling.base.config import ModelConfigBase
+from modeling.base.config import ModelConfigBase
 
 
 class LightningModuleBase(pl.LightningModule):
@@ -27,7 +27,7 @@ class LightningModuleBase(pl.LightningModule):
                 interval='step',
                 name=self.config.lr_scheduler.__class__.__name__
             )
-            return [optimizer], [lr_scheduler_config]
+            return optimizer, lr_scheduler_config
         return optimizer
 
     @abc.abstractmethod
