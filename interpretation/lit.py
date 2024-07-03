@@ -7,7 +7,7 @@ from lit_nlp import dev_server, server_flags
 from lit_nlp.api import types
 from lit_nlp.api.dataset import Dataset, Spec
 from lit_nlp.api.model import Model, JsonDict
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 from utility.json import load_jsons
 
 FLAGS = flags.FLAGS
