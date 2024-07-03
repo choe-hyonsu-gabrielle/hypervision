@@ -1,7 +1,7 @@
 from typing import Any, Literal
 import torch
-from supervision.modeling.base.config import ModelConfigBase
-from supervision.modeling.base.model import LightningModuleBase
+from modeling.base.config import ModelConfigBase
+from modeling.base.model import LightningModuleBase
 
 
 class SequenceScoringConfig(ModelConfigBase):
