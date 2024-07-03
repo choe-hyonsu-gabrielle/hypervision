@@ -4,7 +4,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from data.datamodule import BaselineCSVsDataModule
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
 
 torch.set_printoptions(edgeitems=10, linewidth=200)
