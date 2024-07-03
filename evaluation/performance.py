@@ -3,7 +3,7 @@ import glob
 import warnings
 from sklearn.metrics import classification_report
 from data.datamodule import BaselineCSVsDataModule
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
 warnings.filterwarnings(action='ignore')
 
