@@ -8,22 +8,22 @@ $ pip install transformers lightning tensorboard scikit-learn lit-nlp
 ***
 ### About `supervision`
 
-- `supervision` contains `LightningModule`-based classes for model architecture and training. `supervision.modeling` has basic model kits,
+- `supervision` contains `LightningModule`-based classes for model architecture and training. `modeling` has basic model kits,
 which comprises a couple of model (a subclass of `model.LightningModuleBase`) and its configuration (a subclass of `config.ModelConfigBase`)
  
-- It is very encouraged to make your own model kits under `supervision.modeling`.
-You can easily place whatever you want to put in your model such as activation, objective and learning rate scheduler in the configuration class. (See `BertClassifierConfig` as an example.)
+- It is very encouraged to make your own model kits under `modeling`.
+You can easily place whatever you want to put in your model such as activation, objective and learning rate scheduler in the configuration class. (See `SentenceClassificationConfig` as an example.)
 
-- Once you defined your original model class (ex. `SentenceClassificationModel`) and model config class (ex. `SentenceClassificationConfig`),
-you can simply initialize a model object, which is actually `pl.LightningModule` at the core, by passing
-a model config object that you've just implemented.
+- Once you defined your own model (ex. `SentenceClassificationModel`) and config (ex. `SentenceClassificationConfig`) classes,
+you can simply instantiate a model, which is actually `pl.LightningModule` at the core, by passing
+a model config that you've just implemented.
 
 - Please be noticed that `config.ModelConfigBase` holds all of pretrained artifacts (`AutoModel` and `AutoTokenizer`) from
 `transformers` at first. Then `model.LightningModuleBase` will automatically load the pretrained artifacts from model
 config object you've just passed to.
 
 ```python
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
 config = SentenceClassificationConfig(
     pretrained_model_name_or_path='klue/bert-base',  # AutoTokenizer & AutoModel are prepared to be fed to model later.
@@ -36,7 +36,7 @@ config = SentenceClassificationConfig(
 
 model = SentenceClassificationModel(config)  # model initiated with pretrained artifacts from config.
 ```
-- `supervision.data` has all codes for training and evaluation data. You need to define custom `DatasetBase`, 
+- `data` has all codes for training and evaluation data. You need to define custom `DatasetBase`, 
 (a subclass of `Dataset` from `torch`) `DataModuleBase` (a subclass of `pl.LightningDataModule`) and
 custom collator function. (See `collator.BaselineCSVsCollator` as an example.)
 
@@ -44,7 +44,7 @@ custom collator function. (See `collator.BaselineCSVsCollator` as an example.)
 - You can see detailed, working code example of single training event at `supervision/training.py`.
 ```python
 import pytorch_lightning as pl
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 from data.datamodule import BaselineCSVsDataModule
  
 # loading model & data
@@ -72,7 +72,7 @@ under the `for` loop which is motivated by `HypervisionSession.supervision_sessi
 ```python
 import pytorch_lightning as pl
 from hypervision.session import HypervisionSession
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 from data.datamodule import BaselineCSVsDataModule
 
 hypervisor = HypervisionSession(session_name='DEMO')
@@ -109,7 +109,7 @@ for session in hypervisor.supervision_sessions:
 ***
 ### How to load finetuned model
 ```python
-from supervision.modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
+from modeling.sentence_classifier_kit import SentenceClassificationConfig, SentenceClassificationModel
 
 config = SentenceClassificationConfig(pretrained_model_name_or_path='klue/bert-base', num_classes=2)
 # It will not load immediately bare pretrained model from HuggingFace Hub until requested.
