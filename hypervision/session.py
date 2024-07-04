@@ -44,6 +44,7 @@ class HypervisionSession:
         }
         self.trainer_params: dict = {
             'max_epochs': 20,
+            'accelerator': 'auto',
             'devices': [0, 1, 2, 3],  # gpu device ids for pl.Trainer
             'strategy': 'auto'  # or 'ddp_find_unused_parameters_true'
             'log_every_n_steps': 100
