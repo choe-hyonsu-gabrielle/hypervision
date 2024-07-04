@@ -54,6 +54,7 @@ class HyperParameterTuning(HypervisionSession):
         }
         self.trainer_params: dict = {
             'max_epochs': 20,
+            'accelerator': 'auto',
             'devices': [0, 1, 2, 3],                        # gpu device ids for pl.Trainer
             'strategy': 'ddp_find_unused_parameters_true',  # when you are using BERT
             # 'strategy': 'auto',
@@ -74,40 +75,16 @@ if __name__ == '__main__':
         session.initiate()
 
         # This is an independent model config. All args you need are stored in `session`.
-        # config = SentenceClassificationConfig(**session.model_params)
-        config = SentenceClassificationConfig(
-            pretrained_model_name_or_path=session.pretrained_model_name_or_path,
-            num_classes=session.num_classes,
-            batch_size=session.batch_size,
-            learning_rate=session.learning_rate,
-            pooling_strategy=session.pooling_strategy,
-            max_seq_length=session.max_seq_length
-        )
+        config = SentenceClassificationConfig(**session.model_params)
 
         # This is an independent LightningModule model.
-        model = SentenceClassificationModel(config=config)
+        model = SentenceClassificationModel(config)
 
         # This is an independent DataModule.
-        # datamodule = BaselineCSVsDataModule(**session.datamodule_params)
-        datamodule = BaselineCSVsDataModule(
-            train_dir=session.train_dir,
-            validation_dir=session.validation_dir,
-            test_dir=session.test_dir,
-            batch_size=session.batch_size,
-            train_validation_ratio=session.train_validation_ratio,
-            random_seed=hypervisor.random_seed
-        )
+        datamodule = BaselineCSVsDataModule(**session.datamodule_params)
 
         # This is a Lightning Trainer.
-        trainer = pl.Trainer(
-            max_epochs=session.trainer_params['max_epochs'],
-            accelerator='auto',
-            devices=session.trainer_params['devices'],
-            strategy=session.trainer_params['strategy'],
-            callbacks=session.callbacks,
-            logger=session.tensorboard_logger,
-            log_every_n_steps=session.trainer_params['log_every_n_steps']
-        )
+        trainer = pl.Trainer(**session.trainer_params)
 
         # check if you want to full fine-tuning or not before start
         model.train()
