@@ -30,7 +30,8 @@ if __name__ == '__main__':
         num_classes=2,
         batch_size=64,
         learning_rate=1e-5,
-        pooling_strategy='cls'
+        pooling_strategy='cls',
+        max_seq_length='max'
     )
 
     # This is an independent LightningModule model.
