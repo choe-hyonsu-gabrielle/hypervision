@@ -19,7 +19,7 @@ class LightningModuleBase(pl.LightningModule):
         self.pretrained_tokenizer: PreTrainedTokenizer = self.config.pretrained_tokenizer
         self.pretrained_model: PreTrainedModel = self.config.pretrained_model.to(self.device)
 
-    def configure_optimizers(self) -> OptimizerLRScheduler:
+    def configure_optimizers(self):
         optimizer = self.config.optimizer(self.parameters(), lr=self.config.learning_rate)
         if self.config.lr_scheduler:
             lr_scheduler_config = dict(
@@ -27,7 +27,7 @@ class LightningModuleBase(pl.LightningModule):
                 interval='step',
                 name=self.config.lr_scheduler.__class__.__name__
             )
-            return optimizer, lr_scheduler_config
+            return [optimizer], [lr_scheduler_config]
         return optimizer
 
     @abc.abstractmethod
