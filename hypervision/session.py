@@ -80,7 +80,7 @@ class HypervisionSession:
             self.session_name,                          # using hypervisor session name as a prefix
             model_name,                                 # any '/' in model name will be replaced with '-'
             dataset_param['name'],                      # dataset_name
-            f'lr={learning_rate}.bs={batch_size}.ps={pooling_strategy}.mx={max_seq_length}'  # learning_rate & batch_size as identifier
+            f'lr={learning_rate}.bs={batch_size}.pool={pooling_strategy}.len={max_seq_length}'  # learning_rate & batch_size as identifier
         ]).replace('/', '-')
         return SupervisionSession(
             hypervisor=self,
