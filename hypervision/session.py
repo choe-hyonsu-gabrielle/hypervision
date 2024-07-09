@@ -206,7 +206,7 @@ class SupervisionSession:
     def initiate(self):
         # initiate version, loggers and callbacks
         self.started_at = datetime.datetime.now()
-        self.version = self.started_at.strftime("v%y%m%d-%p%H%M")
+        self.version = self.started_at.strftime("v%y%m%d-%H%M%p")
         self.tensorboard_logger = TensorBoardLogger(
             save_dir=self.hypervisor.logging_dir,
             name=self.session_name,
