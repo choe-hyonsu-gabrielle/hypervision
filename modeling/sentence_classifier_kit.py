@@ -128,8 +128,8 @@ class SentenceClassificationModel(LightningModuleBase):
         return dict(loss=loss)
 
     def on_validation_epoch_end(self) -> None:
-        self.log('valid/acc', self.valid_acc.compute(), prog_bar=True, sync_dist=True)
-        self.log('valid/f1', self.valid_f1.compute(), prog_bar=True, sync_dist=True)
+        self.log(name='valid/acc', value=self.valid_acc.compute(), prog_bar=True, sync_dist=True)
+        self.log(name='valid/f1', value=self.valid_f1.compute(), prog_bar=True, sync_dist=True)
         self.valid_acc.reset()
         self.valid_f1.reset()
 
