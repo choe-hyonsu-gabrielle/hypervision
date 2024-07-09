@@ -31,22 +31,24 @@ class LightningModuleBase(pl.LightningModule):
         return optimizer
 
     @abc.abstractmethod
-    def batch_forward_and_loss(self, samples: Any) -> torch.Tensor:
+    def batch_forward_and_loss(self, samples: Any) -> tuple[torch.Tensor, torch.Tensor]:
+        # make it returns a tuple of loss and logit like,
+        # return loss, logit
         pass
 
     def training_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
-        loss = self.batch_forward_and_loss(samples)
+        loss, _ = self.batch_forward_and_loss(samples)
         self.log(name='train/loss', value=loss, prog_bar=True, sync_dist=True)
         if self.config.lr_scheduler:
             self.log('learning_rate', self.lr_schedulers().get_last_lr()[0], prog_bar=True, sync_dist=True)
         return dict(loss=loss)
 
     def validation_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
-        loss = self.batch_forward_and_loss(samples)
+        loss, _ = self.batch_forward_and_loss(samples)
         self.log(name='valid/loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
         return dict(loss=loss)
 
     def test_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
-        loss = self.batch_forward_and_loss(samples)
+        loss, _ = self.batch_forward_and_loss(samples)
         self.log(name='test/loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
         return dict(loss=loss)
