@@ -1,5 +1,7 @@
 from typing import Any, Literal
 import torch
+from pytorch_lightning.utilities.types import STEP_OUTPUT
+from torchmetrics import Accuracy, F1Score
 from modeling.base.config import ModelConfigBase
 from modeling.base.model import LightningModuleBase
 
@@ -57,6 +59,10 @@ class SentenceClassificationModel(LightningModuleBase):
             out_features=config.num_classes
         ).to(self.device)
 
+        # metrics
+        self.valid_acc = Accuracy('binary').to(self.device)
+        self.valid_f1 = F1Score('binary').to(self.device)
+
     def tokenize(self, list_of_texts: list[str]):
         encoded = self.pretrained_tokenizer.batch_encode_plus(
             batch_text_or_text_pairs=list_of_texts,
@@ -91,7 +97,7 @@ class SentenceClassificationModel(LightningModuleBase):
             output_logit=batch_logits,
             target_logit=torch.tensor(samples['targets'], dtype=torch.float, device=self.device)
         )
-        return batch_loss
+        return batch_loss, batch_logits
 
     def predict(self, samples, return_mode: Literal['logit', 'probs', 'score', 'label'] = 'label'):
         self.eval()
@@ -111,6 +117,21 @@ class SentenceClassificationModel(LightningModuleBase):
                 return torch.argmax(batch_probs, dim=-1)
             else:
                 raise ValueError("return_mode: Literal['logit', 'probs', 'score', 'label']")
+
+    def validation_step(self, samples, *args: Any, **kwargs: Any) -> STEP_OUTPUT:
+        loss, logit = self.batch_forward_and_loss(samples)
+        self.log(name='valid/loss', value=loss, batch_size=self.config.batch_size, prog_bar=True, sync_dist=True)
+        pred = torch.argmax(self.config.activation(logit), dim=-1)
+        labels = torch.tensor(samples['labels'], device=self.device)
+        self.valid_acc.update(pred, labels)
+        self.valid_f1.update(pred, labels)
+        return dict(loss=loss)
+
+    def on_validation_epoch_end(self) -> None:
+        self.log('valid/acc', self.valid_acc.compute(), prog_bar=True, sync_dist=True)
+        self.log('valid/f1', self.valid_f1.compute(), prog_bar=True, sync_dist=True)
+        self.valid_acc.reset()
+        self.valid_f1.reset()
 
 
 if __name__ == '__main__':
