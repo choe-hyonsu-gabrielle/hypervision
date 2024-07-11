@@ -106,6 +106,6 @@ def main(argv: Sequence[str]) -> Optional[dev_server.LitServerType]:
 
 
 if __name__ == "__main__":
-    # python -m interpretation.lit
+    # run `$ python -m interpretation.lit` at root of the project
     app.run(main)
   
