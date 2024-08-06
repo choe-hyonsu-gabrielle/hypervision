@@ -15,11 +15,11 @@ which comprises a couple of model (a subclass of `model.LightningModuleBase`) an
 You can easily place activation, objective, learning rate scheduler and whatever you want to put in your model
 in the configuration class. (See `SentenceClassificationConfig` as an example.)
 
-- Once you defined your own model (ex. `SentenceClassificationModel`) and config (ex. `SentenceClassificationConfig`) classes,
+- Once you defined your own model and config classes, (see `SentenceClassificationModel` and `SentenceClassificationConfig`)
 you can simply instantiate a model, which is actually `pl.LightningModule` at the core, by passing
-a model config that you've just implemented.
+a config of that model you've just implemented.
 
-- Please be noticed that `config.ModelConfigBase` holds all of pretrained artifacts (`AutoModel` and `AutoTokenizer`) from
+- Please be noticed that the `config.ModelConfigBase` holds all of pretrained artifacts (`AutoConfig`, `AutoTokenizer` and `AutoModel`) from
 `transformers` at first. Then `model.LightningModuleBase` will automatically load the pretrained artifacts from model
 config object you've just passed to.
 
